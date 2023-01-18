@@ -1,47 +1,65 @@
+// Context API Docs: https://beta.reactjs.org/learn/passing-data-deeply-with-context
+
 import React, {
-  createContext,
+  createContext, //
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { addUser, getUser } from '../../.husky/api/userData';
+import { checkUser } from '../auth';
 import { firebase } from '../client';
 
 const AuthContext = createContext();
 
-AuthContext.displayName = 'AuthContext';
+AuthContext.displayName = 'AuthContext'; // Context object accepts a displayName string property. React DevTools uses this string to determine what to display for the context. https://reactjs.org/docs/context.html#contextdisplayname
 
 const AuthProvider = (props) => {
   const [user, setUser] = useState(null);
+  const [oAuthUser, setOAuthUser] = useState(null);
+
+  // there are 3 states for the user:
+  // null = application initial state, not yet loaded
+  // false = user is not logged in, but the app has loaded
+  // an object/value = user is logged in
+
+  const onUpdate = useMemo(
+    () => (uid) => checkUser(uid).then((userInfo) => {
+      setUser({ fbUser: oAuthUser, ...userInfo });
+    }),
+    [oAuthUser],
+  );
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(async (fbUser) => {
+    firebase.auth().onAuthStateChanged((fbUser) => {
       if (fbUser) {
-        await getUser(fbUser.uid).then(async (response) => {
-          if (!response) {
-            const userCreate = {
-              uid: fbUser.uid,
-              userName: fbUser.displayName,
-              userImage: fbUser.photoURL,
-            };
-            await addUser(userCreate).then(() => setUser(fbUser));
+        setOAuthUser(fbUser);
+        checkUser(fbUser.uid).then((userInfo) => {
+          let userObj = {};
+          if ('null' in userInfo) {
+            userObj = userInfo;
           } else {
-            setUser(fbUser);
+            userObj = { fbUser, uid: fbUser.uid, ...userInfo };
           }
+          setUser(userObj);
         });
       } else {
+        setOAuthUser(false);
         setUser(false);
       }
-    });
+    }); // creates a single global listener for auth state changed
   }, []);
 
   const value = useMemo(
+    // https://reactjs.org/docs/hooks-reference.html#usememo
     () => ({
       user,
-      userLoading: user === null,
+      onUpdate,
+      userLoading: user === null || oAuthUser === null,
+      // as long as user === null, will be true
+      // As soon as the user value !== null, value will be false
     }),
-    [user],
+    [user, oAuthUser, onUpdate],
   );
 
   return <AuthContext.Provider value={value} {...props} />;
