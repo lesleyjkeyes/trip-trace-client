@@ -10,7 +10,7 @@ function YourTrips() {
   const { user } = useAuth();
 
   const getYourTrips = () => {
-    getUserTrips(user.uid).then(setTrips);
+    getUserTrips(user.id).then(setTrips);
   };
 
   useEffect(() => {

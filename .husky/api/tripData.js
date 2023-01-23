@@ -4,7 +4,7 @@ import { clientCredentials } from '../../utils/client';
 const dbUrl = clientCredentials.databaseURL;
 
 const getAllTrips = () => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/trips.json`)
+  axios.get(`${dbUrl}/trips`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));
@@ -15,10 +15,24 @@ const getAllTrips = () => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-const getSingleTrip = (firebaseKey) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/trips/${firebaseKey}.json`)
-    .then((response) => resolve(response.data))
-    .catch((error) => reject(error));
+const getSingleTrip = (tripId) => new Promise((resolve, reject) => {
+  fetch(`${dbUrl}/trips/${tripId}`).then((response) => response.json())
+    .then((data) => {
+      resolve({
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        imageUrl: data.image_url,
+        createdOn: data.created_on,
+        duration: data.duration,
+        durationUnit: data.duration_unit,
+        userId: data.traveler_id,
+        region: data.region,
+        country: data.country,
+        city: data.city,
+        public: data.public,
+      });
+    }).catch((error) => reject(error));
 });
 
 const updateTrip = (tripObj) => new Promise((resolve, reject) => {
@@ -27,15 +41,28 @@ const updateTrip = (tripObj) => new Promise((resolve, reject) => {
     .catch(reject);
 });
 
-const createTrip = (tripObj) => new Promise((resolve, reject) => {
-  axios.post(`${dbUrl}/trips.json`, tripObj)
-    .then((response) => {
-      const payload = { tripFirebaseKey: response.data.name };
-      axios.patch(`${dbUrl}/trips/${response.data.name}.json`, payload)
-        .then(() => {
-          getAllTrips(tripObj.uid).then(resolve);
-        });
-    }).catch(reject);
+const createTrip = (user, trip) => new Promise((resolve, reject) => {
+  const tripObj = {
+    traveler_id: user.id,
+    title: trip.title,
+    description: trip.description,
+    image_url: trip.imageUrl,
+    duration: trip.duration,
+    duration_unit: trip.durationUnit,
+    region: trip.region,
+    country: trip.country,
+    city: trip.city,
+    public: trip.public
+  };
+  fetch(`${clientCredentials.databaseURL}/trips`, {
+    method: 'POST',
+    body: JSON.stringify(tripObj),
+    headers: {
+      'content-type': 'application/json',
+    },
+  })
+    .then((response) => resolve(response.json()))
+    .catch((error) => reject(error));
 });
 
 const deleteSingleTrip = (firebaseKey) => new Promise((resolve, reject) => {
@@ -46,8 +73,8 @@ const deleteSingleTrip = (firebaseKey) => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-const getUserTrips = (uid) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/trips.json?orderBy="uid"&equalTo="${uid}"`)
+const getUserTrips = (travelerId) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/trips?traveler_id=${travelerId}`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));
@@ -59,7 +86,7 @@ const getUserTrips = (uid) => new Promise((resolve, reject) => {
 });
 
 const getPublicTrips = () => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/trips.json?orderBy="public"&equalTo=true`)
+  axios.get(`${dbUrl}/trips?public=True`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));

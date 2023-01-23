@@ -23,7 +23,7 @@ export default function TripCard({ tripObj, onUpdate }) {
     }
   };
   const getAndSetUserFavorites = () => {
-    getFavorites(user.uid).then((data) => {
+    getFavorites(user.id).then((data) => {
       setFavorites(data);
     });
   };
@@ -62,7 +62,7 @@ export default function TripCard({ tripObj, onUpdate }) {
     <Card style={{ width: '18rem', margin: '10px' }}>
       <Card.Img variant="top" src={tripObj?.imageUrl} alt={tripObj?.title} style={{ height: '200px' }} />
       <Card.Body>
-        <Card.Link href={`/Trip/${tripObj?.tripFirebaseKey}`}>{tripObj?.title}</Card.Link>
+        <Card.Link href={`/trips/${tripObj?.id}`}>{tripObj?.title}</Card.Link>
         <div className="vidCardImageDiv">
           <NavLink href={`/userProfile/${tripObj?.uid}`} passHref>
             <Image style={{ height: '50px' }} className="tripCardCreatorImage" src={tripObj?.userPhoto} />
@@ -121,6 +121,7 @@ TripCard.propTypes = {
     userPhoto: PropTypes.string,
     userName: PropTypes.string,
     uid: PropTypes.string,
+    id: PropTypes.number,
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
 };

@@ -4,7 +4,7 @@ import { clientCredentials } from '../../utils/client';
 const dbUrl = clientCredentials.databaseURL;
 
 const createFavorite = (favoriteObj) => new Promise((resolve, reject) => {
-  axios.post(`${dbUrl}/favorites.json`, favoriteObj)
+  axios.post(`${dbUrl}/favorites`, favoriteObj)
     .then((response) => {
       const payload = { favoriteFirebaseKey: response.data.name };
       axios.patch(`${dbUrl}/favorites/${response.data.name}.json`, payload)
@@ -18,8 +18,8 @@ const deleteSingleFavorite = (favoriteFirebaseKey) => new Promise((resolve, reje
     .catch((error) => reject(error));
 });
 
-const getFavorites = (uid) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/favorites.json?orderBy="uid"&equalTo="${uid}"`)
+const getFavorites = (id) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/favorites?traveler_id=${id}`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));
@@ -30,8 +30,8 @@ const getFavorites = (uid) => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-const getFavoritesByUser = (uid) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/favorites.json?orderBy="uid"&equalTo="${uid}"`)
+const getFavoritesByUser = (travelerId) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/favorites?traveler_id=${travelerId}`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));

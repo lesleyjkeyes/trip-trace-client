@@ -7,28 +7,24 @@ import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 import { useAuth } from '../../utils/context/authContext';
 import { createTrip, updateTrip } from '../../.husky/api/tripData';
-import getAllCountries from '../../.husky/api/countryData';
 
 const initialState = {
   title: '',
   description: '',
   imageUrl: '',
+  duration: '',
+  durationUnit: '',
+  region: '',
   city: '',
   country: '',
-  duration: '',
 };
 function TripForm({ obj }) {
   const [formInput, setFormInput] = useState(initialState);
-  const [countries, setCountries] = useState([]);
   const router = useRouter();
   const { user } = useAuth();
 
   useEffect(() => {
-    getAllCountries().then(setCountries);
-  }, []);
-
-  useEffect(() => {
-    if (obj?.tripFirebaseKey) setFormInput(obj);
+    if (obj?.id) setFormInput(obj);
   }, [obj]);
 
   const handleChange = (e) => {
@@ -41,7 +37,7 @@ function TripForm({ obj }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (obj.tripFirebaseKey) {
+    if (obj.id) {
       updateTrip(formInput)
         .then(() => router.push('/yourTrips'));
     } else {
@@ -68,30 +64,20 @@ function TripForm({ obj }) {
           <FloatingLabel controlId="floatingInput2" label="Trip Image" className="mb-3">
             <Form.Control type="url" placeholder="Add Trip Photo" name="imageUrl" value={formInput.imageUrl} onChange={handleChange} required />
           </FloatingLabel>
-          <FloatingLabel controlId="floatingSelect" label="Country">
-            <Form.Select
-              aria-label="Country"
-              name="country"
-              onChange={handleChange}
-              className="mb-3"
-              required
-            >
-              <option value="">Select a Country</option>
-              {
-              countries.map((country) => (
-                <option
-                  key={country.firebaseKey}
-                  value={country.firebaseKey}
-                  selected={!obj ? '' : obj.country === country.name}
-                >
-                  {country.name}
-                </option>
-              ))
-            }
-            </Form.Select>
+          <FloatingLabel controlId="floatingInput2" label="Region" className="mb-3">
+            <Form.Control type="text" placeholder="Add Region(Optional)" name="region" value={formInput.region} onChange={handleChange} />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Country" className="mb-3">
+            <Form.Control type="text" placeholder="Add Country" name="country" value={formInput.country} onChange={handleChange} required />
           </FloatingLabel>
           <FloatingLabel controlId="floatingInput2" label="City" className="mb-3">
             <Form.Control type="text" placeholder="Add City(Optional)" name="city" value={formInput.city} onChange={handleChange} />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Trip Duration" className="mb-3">
+            <Form.Control type="number" placeholder="Enter Trip Duration" name="duration" value={formInput.duration} onChange={handleChange} required />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Duration Unit" className="mb-3">
+            <Form.Control type="text" placeholder="Add Duration Unit" name="durationUnit" value={formInput.durationUnit} onChange={handleChange} required />
           </FloatingLabel>
           <Form.Check
             type="switch"
@@ -106,10 +92,7 @@ function TripForm({ obj }) {
               }));
             }}
           />
-          <FloatingLabel controlId="floatingInput2" label="Trip Duration(Days)" className="mb-3">
-            <Form.Control type="number" placeholder="Enter Trip Duration(Days)" name="duration" value={formInput.duration} onChange={handleChange} required />
-          </FloatingLabel>
-          <Button type="submit">{obj?.tripFirebaseKey ? 'Update' : 'Create'} Trip</Button>
+          <Button type="submit">{obj?.id ? 'Update' : 'Create'} Trip</Button>
         </Form>
       ) : (
         <div>
