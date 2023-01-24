@@ -8,7 +8,7 @@ import TripCard from '../components/TripCard';
 function CountryFilter() {
   const [trips, setTrips] = useState([]);
   const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState('');
+  const [country, setCountry] = useState('0');
 
   const getTrips = () => {
     getTripsByCountry(country).then((data) => {
@@ -34,7 +34,10 @@ function CountryFilter() {
           <Form.Select
             aria-label="Country"
             name="country"
-            onChange={(e) => { setCountry(e.target.value); }}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              console.warn(e.target);
+            }}
             className="mb-3"
             required
           >
@@ -42,8 +45,8 @@ function CountryFilter() {
             {
               countries.map((c) => (
                 <option
-                  key={c.firebaseKey}
-                  value={c.firebaseKey}
+                  key={c.id}
+                  value={c.id}
                 >
                   {c.name}
                 </option>

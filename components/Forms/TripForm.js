@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 import { useAuth } from '../../utils/context/authContext';
 import { createTrip, updateTrip } from '../../.husky/api/tripData';
+import getAllCountries from '../../.husky/api/countryData';
 
 const initialState = {
   title: '',
@@ -16,12 +17,18 @@ const initialState = {
   durationUnit: '',
   region: '',
   city: '',
-  country: '',
+  countryId: '',
+  public: false,
 };
 function TripForm({ obj }) {
   const [formInput, setFormInput] = useState(initialState);
   const router = useRouter();
   const { user } = useAuth();
+  const [countries, setCountries] = useState([]);
+
+  useEffect(() => {
+    getAllCountries().then(setCountries);
+  }, []);
 
   useEffect(() => {
     if (obj?.id) setFormInput(obj);
@@ -42,9 +49,9 @@ function TripForm({ obj }) {
         .then(() => router.push('/yourTrips'));
     } else {
       const payload = {
-        ...formInput, uid: user.uid, userPhoto: user.photoURL, userName: user.displayName,
+        ...formInput,
       };
-      createTrip(payload).then(() => {
+      createTrip(user, payload).then(() => {
         router.push('/yourTrips');
       });
     }
@@ -67,8 +74,27 @@ function TripForm({ obj }) {
           <FloatingLabel controlId="floatingInput2" label="Region" className="mb-3">
             <Form.Control type="text" placeholder="Add Region(Optional)" name="region" value={formInput.region} onChange={handleChange} />
           </FloatingLabel>
-          <FloatingLabel controlId="floatingInput2" label="Country" className="mb-3">
-            <Form.Control type="text" placeholder="Add Country" name="country" value={formInput.country} onChange={handleChange} required />
+          <FloatingLabel controlId="floatingSelect" label="Country">
+            <Form.Select
+              aria-label="Country"
+              name="countryId"
+              onChange={handleChange}
+              className="mb-3"
+              required
+            >
+              <option value="">Select a Country</option>
+              {
+              countries.map((country) => (
+                <option
+                  key={country.id}
+                  value={country.id}
+                  selected={!obj ? '' : obj.countryId === country.id}
+                >
+                  {country.name}
+                </option>
+              ))
+            }
+            </Form.Select>
           </FloatingLabel>
           <FloatingLabel controlId="floatingInput2" label="City" className="mb-3">
             <Form.Control type="text" placeholder="Add City(Optional)" name="city" value={formInput.city} onChange={handleChange} />
@@ -78,6 +104,9 @@ function TripForm({ obj }) {
           </FloatingLabel>
           <FloatingLabel controlId="floatingInput2" label="Duration Unit" className="mb-3">
             <Form.Control type="text" placeholder="Add Duration Unit" name="durationUnit" value={formInput.durationUnit} onChange={handleChange} required />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Price Range" className="mb-3">
+            <Form.Control type="text" placeholder="Add Price Range(Optional)" name="priceRange" value={formInput.priceRange} onChange={handleChange} />
           </FloatingLabel>
           <Form.Check
             type="switch"
@@ -110,8 +139,9 @@ TripForm.propTypes = {
     imageUrl: PropTypes.string,
     tripFirebaseKey: PropTypes.string,
     city: PropTypes.string,
-    country: PropTypes.string,
+    countryId: PropTypes.number,
     id: PropTypes.string,
+    public: PropTypes.bool,
   }),
 };
 

@@ -8,7 +8,7 @@ function FavoriteTrips() {
   const [trips, setTrips] = useState([]);
 
   const getTheFavs = () => {
-    getUsersFavoriteTrips(user.uid).then(setTrips);
+    getUsersFavoriteTrips(user.id).then(setTrips);
   };
 
   useEffect(() => {

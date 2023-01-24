@@ -3,17 +3,24 @@ import { clientCredentials } from '../../utils/client';
 
 const dbUrl = clientCredentials.databaseURL;
 
-const createFavorite = (favoriteObj) => new Promise((resolve, reject) => {
-  axios.post(`${dbUrl}/favorites`, favoriteObj)
-    .then((response) => {
-      const payload = { favoriteFirebaseKey: response.data.name };
-      axios.patch(`${dbUrl}/favorites/${response.data.name}.json`, payload)
-        .then((patchResponse) => resolve(patchResponse.data));
-    }).catch(reject);
+const createFavorite = (userId, tripId) => new Promise((resolve, reject) => {
+  const favoriteObj = {
+    traveler_id: userId,
+    trip_id: tripId,
+  };
+  fetch(`${clientCredentials.databaseURL}/favorites`, {
+    method: 'POST',
+    body: JSON.stringify(favoriteObj),
+    headers: {
+      'content-type': 'application/json',
+    },
+  })
+    .then((response) => resolve(response.json()))
+    .catch((error) => reject(error));
 });
 
-const deleteSingleFavorite = (favoriteFirebaseKey) => new Promise((resolve, reject) => {
-  axios.delete(`${dbUrl}/favorites/${favoriteFirebaseKey}.json`)
+const deleteSingleFavorite = (id) => new Promise((resolve, reject) => {
+  axios.delete(`${dbUrl}/favorites/${id}`)
     .then(resolve)
     .catch((error) => reject(error));
 });

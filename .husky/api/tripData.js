@@ -28,16 +28,29 @@ const getSingleTrip = (tripId) => new Promise((resolve, reject) => {
         durationUnit: data.duration_unit,
         userId: data.traveler_id,
         region: data.region,
-        country: data.country,
+        countryId: data.country_id,
         city: data.city,
         public: data.public,
+        priceRange: data.price_range
       });
     }).catch((error) => reject(error));
 });
 
 const updateTrip = (tripObj) => new Promise((resolve, reject) => {
-  axios.patch(`${dbUrl}/trips/${tripObj.tripFirebaseKey}.json`, tripObj)
-    .then(() => getAllTrips(tripObj.uid).then(resolve))
+  const newTripObj = {
+    title: tripObj.title,
+    description: tripObj.description,
+    image_url: tripObj.imageUrl,
+    duration: tripObj.duration,
+    duration_unit: tripObj.durationUnit,
+    region: tripObj.region,
+    country_id: tripObj.countryId,
+    city: tripObj.city,
+    public: tripObj.public,
+    price_range: tripObj.priceRange
+  };
+  axios.put(`${dbUrl}/trips/${tripObj.id}`, newTripObj)
+    .then(() => getAllTrips().then(resolve))
     .catch(reject);
 });
 
@@ -50,9 +63,10 @@ const createTrip = (user, trip) => new Promise((resolve, reject) => {
     duration: trip.duration,
     duration_unit: trip.durationUnit,
     region: trip.region,
-    country: trip.country,
+    country_id: trip.countryId,
     city: trip.city,
-    public: trip.public
+    public: trip.public,
+    price_range: trip.priceRange
   };
   fetch(`${clientCredentials.databaseURL}/trips`, {
     method: 'POST',
@@ -65,8 +79,8 @@ const createTrip = (user, trip) => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-const deleteSingleTrip = (firebaseKey) => new Promise((resolve, reject) => {
-  axios.delete(`${dbUrl}/trips/${firebaseKey}.json`)
+const deleteSingleTrip = (tripId) => new Promise((resolve, reject) => {
+  axios.delete(`${dbUrl}/trips/${tripId}`)
     .then(() => {
       getAllTrips().then((tripsArray) => resolve(tripsArray));
     })
@@ -107,8 +121,8 @@ const getFavoriteTrips = () => new Promise((resolve, reject) => {
     }).catch((error) => reject(error));
 });
 
-const getTripsByCountry = (country) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/trips.json?orderBy="country"&equalTo="${country}"`)
+const getTripsByCountry = (countryId) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/trips?country_id=${countryId}`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));
