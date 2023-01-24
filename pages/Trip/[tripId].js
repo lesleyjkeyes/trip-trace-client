@@ -13,14 +13,14 @@ function SingleTripView() {
   const [stops, setStops] = useState([]);
   const { user } = useAuth();
   const router = useRouter();
-  const { tripFirebaseKey } = router.query;
+  const { tripId } = router.query;
 
   const getTheTrip = () => {
-    getSingleTrip(tripFirebaseKey).then(setTrip);
+    getSingleTrip(tripId).then(setTrip);
   };
 
   const getAllTripStops = () => {
-    getTripStops(tripFirebaseKey).then(setStops);
+    getTripStops(tripId).then(setStops);
   };
 
   useEffect(() => {
@@ -56,7 +56,7 @@ function SingleTripView() {
       <>
         { user.uid === trip.uid ? (
           <div>
-            <Link passHref href={`/Trip/${tripFirebaseKey}/stop/new`}>
+            <Link passHref href={`/trips/${tripId}/stop/new`}>
               <Button variant="dark">Add Stop</Button>
             </Link>
           </div>
@@ -70,12 +70,12 @@ function SingleTripView() {
       <>
         { user.uid === trip.uid ? (
           <div>
-            <Link passHref href={`/Trip/${tripFirebaseKey}/item/new`}>
+            <Link passHref href={`/trips/${tripId}/item/new`}>
               <Button variant="dark">Add Item</Button>
             </Link>
           </div>
         ) : ''}
-        <PackingTable uid={user.uid} tripFirebaseKey={tripFirebaseKey} />
+        <PackingTable uid={user.uid} tripId={tripId} />
       </>
     </div>
   );

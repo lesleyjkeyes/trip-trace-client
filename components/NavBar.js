@@ -30,7 +30,7 @@ export default function NavBar() {
             <Link passHref href="/Trip/new">
               <Nav.Link>Add a Trip</Nav.Link>
             </Link>
-            <Link passHref href="/favoriteTrips">
+            <Link passHref href="/favoriteTrips/">
               <Nav.Link>Favorites</Nav.Link>
             </Link>
             <Link passHref href="/profile">

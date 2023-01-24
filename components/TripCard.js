@@ -7,7 +7,7 @@ import Form from 'react-bootstrap/Form';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../utils/context/authContext';
 import { createFavorite, deleteSingleFavorite, getFavorites } from '../.husky/api/favoritesData';
-import { deleteEntireTrip } from '../.husky/api/mergeData';
+import { deleteSingleTrip } from '../.husky/api/tripData';
 
 export default function TripCard({ tripObj, onUpdate }) {
   const [favorite, setFavorite] = useState({});
@@ -16,14 +16,14 @@ export default function TripCard({ tripObj, onUpdate }) {
   const { user } = useAuth();
 
   const checkFavorite = () => {
-    const favObj = favorites.find((fav) => fav?.tripFirebaseKey === tripObj?.tripFirebaseKey);
+    const favObj = favorites.find((fav) => fav?.trip_id === tripObj?.id);
     if (favObj !== undefined) {
       setFavorite(favObj);
       setToggleFav(true);
     }
   };
   const getAndSetUserFavorites = () => {
-    getFavorites(user.uid).then((data) => {
+    getFavorites(user.id).then((data) => {
       setFavorites(data);
     });
   };
@@ -40,20 +40,16 @@ export default function TripCard({ tripObj, onUpdate }) {
 
   const deleteThisTrip = () => {
     if (window.confirm(`Delete ${tripObj.title}?`)) {
-      deleteEntireTrip(tripObj.tripFirebaseKey).then(() => onUpdate());
+      deleteSingleTrip(tripObj.id).then(() => onUpdate());
     }
   };
 
   const handleFavorite = (boolean) => {
     if (boolean === true) {
-      const favObj = {
-        uid: user.uid,
-        tripFirebaseKey: tripObj.tripFirebaseKey,
-      };
-      createFavorite(favObj).then(async () => { await getAndSetUserFavorites(); });
+      createFavorite(user.id, tripObj.id).then(async () => { await getAndSetUserFavorites(); });
       setToggleFav(true);
     } else {
-      deleteSingleFavorite(favorite.favoriteFirebaseKey);
+      deleteSingleFavorite(favorite.id);
       setToggleFav(false);
     }
   };
@@ -62,14 +58,14 @@ export default function TripCard({ tripObj, onUpdate }) {
     <Card style={{ width: '18rem', margin: '10px' }}>
       <Card.Img variant="top" src={tripObj?.imageUrl} alt={tripObj?.title} style={{ height: '200px' }} />
       <Card.Body>
-        <Card.Link href={`/Trip/${tripObj?.tripFirebaseKey}`}>{tripObj?.title}</Card.Link>
+        <Card.Link href={`/Trip/${tripObj?.id}`}>{tripObj?.title}</Card.Link>
         <div className="vidCardImageDiv">
-          <NavLink href={`/userProfile/${tripObj?.uid}`} passHref>
+          <NavLink href={`/userProfile/${tripObj?.traveler_id}`} passHref>
             <Image style={{ height: '50px' }} className="tripCardCreatorImage" src={tripObj?.userPhoto} />
           </NavLink>
         </div>
         <div className="userName">
-          <Card.Link href={`/userProfile/${tripObj?.uid}`}>
+          <Card.Link href={`/userProfile/${tripObj?.traveler_id}`}>
             {tripObj?.userName}
           </Card.Link>
         </div>
@@ -95,9 +91,9 @@ export default function TripCard({ tripObj, onUpdate }) {
                 onChange={(e) => handleFavorite(e.target.checked)}
               />
             </Form>
-            { user.uid === tripObj.uid && (
+            { user.id === tripObj.traveler_id && (
               <>
-                <Link href={`/Trip/edit/${tripObj?.tripFirebaseKey}`} passHref>
+                <Link href={`/Trip/edit/${tripObj?.id}`} passHref>
                   <Button variant="info" style={{ margin: '5px' }}>EDIT</Button>
                 </Link>
                 <Button variant="danger" style={{ margin: '5px' }} onClick={deleteThisTrip}>Delete</Button>
@@ -120,7 +116,8 @@ TripCard.propTypes = {
     city: PropTypes.string,
     userPhoto: PropTypes.string,
     userName: PropTypes.string,
-    uid: PropTypes.string,
+    traveler_id: PropTypes.number,
+    id: PropTypes.number,
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
 };

@@ -1,7 +1,6 @@
-import { deleteSingleFavorite, getFavoritesByUser, getTripFavorites } from "./favoritesData";
-import { deleteSingleItem, getTripItems } from "./packData";
+import { getFavorites } from "./favoritesData";
 import { deleteSingleStop, getTripStops } from "./stopData";
-import { deleteSingleTrip, getFavoriteTrips, getSingleTrip } from "./tripData";
+import { deleteSingleTrip, getSingleTrip } from "./tripData";
 
 const deleteTripStops = (tripFirebaseKey) => new Promise((resolve, reject) => {
   getTripStops(tripFirebaseKey).then((stopsArray) => {
@@ -13,27 +12,12 @@ const deleteTripStops = (tripFirebaseKey) => new Promise((resolve, reject) => {
   }).catch((error) => reject(error));
 });
 
-const getUsersFavoriteTrips = async (uid) => {
-  const userFavs = await getFavoritesByUser(uid);
-  const favTrips = userFavs.map((fav) => fav.tripFirebaseKey);
-  const tripObjects = await favTrips.map((firebaseKey) => getSingleTrip(firebaseKey));
+const getUsersFavoriteTrips = async (userId) => {
+  const userFavs = await getFavorites(userId);
+  const favTripIds = userFavs.map((fav) => fav.trip_id);
+  const tripObjects = await favTripIds.map((tripId) => getSingleTrip(tripId));
   const tripObjectArray = await Promise.all(tripObjects);
   return tripObjectArray;
 };
 
-const deleteEntireTrip = (tripFirebaseKey) => new Promise((resolve, reject) => {
-  getTripStops(tripFirebaseKey).then((stopsArray) => {
-    const deleteStopPromises = stopsArray.map((stop) => deleteSingleStop(stop.stopFirebaseKey));
-    getTripItems(tripFirebaseKey).then((itemsArray) => {
-      const deleteItemPromises = itemsArray.map((item) => deleteSingleItem(item.packFirebaseKey));
-      getTripFavorites(tripFirebaseKey).then((favsArray) => {
-        const deleteFavPromises = favsArray.map((fav) => deleteSingleFavorite(fav.favoriteFirebaseKey));
-        Promise.all(deleteStopPromises, deleteItemPromises, deleteFavPromises).then(() => {
-            deleteSingleTrip(tripFirebaseKey).then(resolve);
-        })
-      });
-    });
-  }).catch((error) => reject(error));
-});
-
-export { deleteTripStops, getUsersFavoriteTrips, deleteEntireTrip }
+export { deleteTripStops, getUsersFavoriteTrips }

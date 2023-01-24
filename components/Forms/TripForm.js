@@ -13,22 +13,25 @@ const initialState = {
   title: '',
   description: '',
   imageUrl: '',
-  city: '',
-  country: '',
   duration: '',
+  durationUnit: '',
+  region: '',
+  city: '',
+  countryId: '',
+  public: false,
 };
 function TripForm({ obj }) {
   const [formInput, setFormInput] = useState(initialState);
-  const [countries, setCountries] = useState([]);
   const router = useRouter();
   const { user } = useAuth();
+  const [countries, setCountries] = useState([]);
 
   useEffect(() => {
     getAllCountries().then(setCountries);
   }, []);
 
   useEffect(() => {
-    if (obj?.tripFirebaseKey) setFormInput(obj);
+    if (obj?.id) setFormInput(obj);
   }, [obj]);
 
   const handleChange = (e) => {
@@ -41,14 +44,14 @@ function TripForm({ obj }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (obj.tripFirebaseKey) {
+    if (obj.id) {
       updateTrip(formInput)
         .then(() => router.push('/yourTrips'));
     } else {
       const payload = {
-        ...formInput, uid: user.uid, userPhoto: user.photoURL, userName: user.displayName,
+        ...formInput,
       };
-      createTrip(payload).then(() => {
+      createTrip(user, payload).then(() => {
         router.push('/yourTrips');
       });
     }
@@ -68,10 +71,13 @@ function TripForm({ obj }) {
           <FloatingLabel controlId="floatingInput2" label="Trip Image" className="mb-3">
             <Form.Control type="url" placeholder="Add Trip Photo" name="imageUrl" value={formInput.imageUrl} onChange={handleChange} required />
           </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Region" className="mb-3">
+            <Form.Control type="text" placeholder="Add Region(Optional)" name="region" value={formInput.region} onChange={handleChange} />
+          </FloatingLabel>
           <FloatingLabel controlId="floatingSelect" label="Country">
             <Form.Select
               aria-label="Country"
-              name="country"
+              name="countryId"
               onChange={handleChange}
               className="mb-3"
               required
@@ -80,9 +86,9 @@ function TripForm({ obj }) {
               {
               countries.map((country) => (
                 <option
-                  key={country.firebaseKey}
-                  value={country.firebaseKey}
-                  selected={!obj ? '' : obj.country === country.name}
+                  key={country.id}
+                  value={country.id}
+                  selected={!obj ? '' : obj.countryId === country.id}
                 >
                   {country.name}
                 </option>
@@ -92,6 +98,15 @@ function TripForm({ obj }) {
           </FloatingLabel>
           <FloatingLabel controlId="floatingInput2" label="City" className="mb-3">
             <Form.Control type="text" placeholder="Add City(Optional)" name="city" value={formInput.city} onChange={handleChange} />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Trip Duration" className="mb-3">
+            <Form.Control type="number" placeholder="Enter Trip Duration" name="duration" value={formInput.duration} onChange={handleChange} required />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Duration Unit" className="mb-3">
+            <Form.Control type="text" placeholder="Add Duration Unit" name="durationUnit" value={formInput.durationUnit} onChange={handleChange} required />
+          </FloatingLabel>
+          <FloatingLabel controlId="floatingInput2" label="Price Range" className="mb-3">
+            <Form.Control type="text" placeholder="Add Price Range(Optional)" name="priceRange" value={formInput.priceRange} onChange={handleChange} />
           </FloatingLabel>
           <Form.Check
             type="switch"
@@ -106,10 +121,7 @@ function TripForm({ obj }) {
               }));
             }}
           />
-          <FloatingLabel controlId="floatingInput2" label="Trip Duration(Days)" className="mb-3">
-            <Form.Control type="number" placeholder="Enter Trip Duration(Days)" name="duration" value={formInput.duration} onChange={handleChange} required />
-          </FloatingLabel>
-          <Button type="submit">{obj?.tripFirebaseKey ? 'Update' : 'Create'} Trip</Button>
+          <Button type="submit">{obj?.id ? 'Update' : 'Create'} Trip</Button>
         </Form>
       ) : (
         <div>
@@ -127,8 +139,9 @@ TripForm.propTypes = {
     imageUrl: PropTypes.string,
     tripFirebaseKey: PropTypes.string,
     city: PropTypes.string,
-    country: PropTypes.string,
+    countryId: PropTypes.number,
     id: PropTypes.string,
+    public: PropTypes.bool,
   }),
 };
 
