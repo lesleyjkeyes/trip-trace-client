@@ -3,14 +3,17 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, Button } from 'react-bootstrap';
 import { deleteSingleStop } from '../.husky/api/stopData';
+import { useAuth } from '../utils/context/authContext';
 
 export default function StopCard({
   // eslint-disable-next-line react/prop-types
-  stopObj, onUpdate, index, uid = '',
+  stopObj, onUpdate, index,
 }) {
+  const { user } = useAuth();
+
   const deleteThisStop = () => {
     if (window.confirm('Delete this stop?')) {
-      deleteSingleStop(stopObj.stopFirebaseKey).then(() => onUpdate());
+      deleteSingleStop(stopObj.id, stopObj.trip.id).then(() => onUpdate());
     }
   };
 
@@ -18,14 +21,16 @@ export default function StopCard({
     <Card style={{ width: '18rem' }}>
       <Card.Body>
         <Card.Title>Stop {index + 1} </Card.Title>
-        <Card.Title> {stopObj.stopTitle} </Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">Stop Location: {stopObj.country} {stopObj.stopCity}</Card.Subtitle>
-        <Card.Text>Stop Description: { stopObj.stopDescription }</Card.Text>
-        <Card.Text>Stop Duration: { stopObj.stopDuration } Days</Card.Text>
-        {uid === stopObj.uid && (
+        <Card.Title> {stopObj.title} </Card.Title>
+        <Card.Subtitle className="mb-2 text-muted">Country: {stopObj.country.name} </Card.Subtitle>
+        {stopObj.city ? <Card.Subtitle className="mb-2 text-muted">City: {stopObj.city}</Card.Subtitle> : ''}
+        <Card.Text>Duration: { stopObj.duration }</Card.Text>
+        <Card.Text>Duration Unit: { stopObj.duration_unit }</Card.Text>
+        <Card.Text>Price Range: { stopObj.price_range }</Card.Text>
+        {user.id === stopObj.trip.traveler.id && (
           <>
             <Button variant="dark" onClick={deleteThisStop}>Delete</Button>
-            <Link passHref href={`/Trip/${stopObj.tripFirebaseKey}/stop/edit/${stopObj.stopFirebaseKey}`}>
+            <Link passHref href={`/Trip/${stopObj.trip.id}/stop/edit/${stopObj.id}`}>
               <Button variant="dark">Edit</Button>
             </Link>
           </>
@@ -37,15 +42,20 @@ export default function StopCard({
 
 StopCard.propTypes = {
   stopObj: PropTypes.shape({
-    stopFirebaseKey: PropTypes.string,
-    tripFirebaseKey: PropTypes.string,
-    photoURL: PropTypes.string,
+    id: PropTypes.number,
+    price_range: PropTypes.string,
     stopDescription: PropTypes.string,
     country: PropTypes.string,
-    stopDuration: PropTypes.string,
-    stopCity: PropTypes.string,
-    stopTitle: PropTypes.string,
-    uid: PropTypes.string,
+    duration: PropTypes.string,
+    city: PropTypes.string,
+    duration_unit: PropTypes.string,
+    title: PropTypes.string,
+    trip: PropTypes.shape({
+      id: PropTypes.number,
+      traveler: PropTypes.shape({
+        id: PropTypes.number,
+      }),
+    }),
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
 };

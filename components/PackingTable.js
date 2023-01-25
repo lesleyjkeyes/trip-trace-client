@@ -3,40 +3,44 @@ import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import Table from 'react-bootstrap/Table';
 import { deleteSingleItem, getTripItems } from '../.husky/api/packData';
+import { useAuth } from '../utils/context/authContext';
 
 // eslint-disable-next-line react/prop-types
-function PackingTable({ tripFirebaseKey, uid = '' }) {
+function PackingTable({ tripId }) {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
 
   const getItems = () => {
-    getTripItems(tripFirebaseKey).then(setItems);
+    getTripItems(tripId).then(setItems);
   };
 
-  const deleteAnItem = (packFirebaseKey) => {
-    deleteSingleItem(packFirebaseKey, tripFirebaseKey).then(setItems);
+  const deleteAnItem = (itemId) => {
+    deleteSingleItem(itemId, tripId).then(setItems);
   };
 
   useEffect(() => {
     getItems();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tripFirebaseKey]);
+  }, [tripId]);
 
   return (
     <Table striped bordered hover>
       <thead>
         <tr>
+          <th>Item Title</th>
           <th>Item Description</th>
           <th>Item Quantity</th>
-          {items[0]?.uid === uid ? <th>Options</th> : ''}
+          {items[0]?.trip.traveler === user.id ? <th>Options</th> : ''}
         </tr>
       </thead>
       <tbody>
         {
           items?.map((item) => (
             <tr>
-              <td>{item.itemDescription}</td>
-              <td>{item.itemQuantity}</td>
-              {item.uid === uid ? <td><Button onClick={() => { deleteAnItem(item.packFirebaseKey); }}>Delete</Button></td> : ''}
+              <th>{item.title}</th>
+              <td>{item.description}</td>
+              <td>{item.quantity}</td>
+              {item.trip.traveler === user.id ? <td><Button onClick={() => { deleteAnItem(item.id); }}>Delete</Button></td> : ''}
             </tr>
           ))
         }
@@ -47,11 +51,10 @@ function PackingTable({ tripFirebaseKey, uid = '' }) {
 
 PackingTable.propTypes = {
   packObj: PropTypes.shape({
-    itemFirebaseKey: PropTypes.string,
-    tripFirebaseKey: PropTypes.string,
-    itemDescription: PropTypes.string,
-    itemQuantity: PropTypes.string,
-    uid: PropTypes.string,
+    id: PropTypes.string,
+    tripId: PropTypes.string,
+    description: PropTypes.string,
+    quantity: PropTypes.string,
   }).isRequired,
 
 };

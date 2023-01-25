@@ -41,7 +41,7 @@ function SingleTripView() {
           <Image className="userPhoto" src={trip?.userPhoto} />
           <Card.Subtitle className="mb-2 text-muted">Created by: {trip?.userName}</Card.Subtitle>
           <Card.Text>
-            Country: {trip?.country}
+            Country: {trip.country?.name}
           </Card.Text>
           {trip?.city && (
           <Card.Text>
@@ -54,9 +54,9 @@ function SingleTripView() {
         </Card.Body>
       </Card>
       <>
-        { user.uid === trip.uid ? (
+        { user.id === trip.travelerId ? (
           <div>
-            <Link passHref href={`/trips/${tripId}/stop/new`}>
+            <Link passHref href={`/Trip/${tripId}/stop/new`}>
               <Button variant="dark">Add Stop</Button>
             </Link>
           </div>
@@ -64,18 +64,18 @@ function SingleTripView() {
       </>
       <div className="stopsDiv">
         {stops?.map((stop, index) => (
-          <StopCard uid={user.uid} index={index} key={stop.FirebaseKey} stopObj={stop} opts={{ height: '160', width: '280' }} onUpdate={getAllTripStops} router={router.asPath} />
+          <StopCard id={user.id} index={index} key={stop.id} stopObj={stop} opts={{ height: '160', width: '280' }} onUpdate={getAllTripStops} router={router.asPath} />
         ))}
       </div>
       <>
-        { user.uid === trip.uid ? (
+        { user.id === trip.travelerId ? (
           <div>
-            <Link passHref href={`/trips/${tripId}/item/new`}>
+            <Link passHref href={`/Trip/${tripId}/item/new`}>
               <Button variant="dark">Add Item</Button>
             </Link>
           </div>
         ) : ''}
-        <PackingTable uid={user.uid} tripId={tripId} />
+        <PackingTable id={user.id} tripId={tripId} />
       </>
     </div>
   );

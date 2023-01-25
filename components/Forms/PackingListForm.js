@@ -5,24 +5,22 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
-import { useAuth } from '../../utils/context/authContext';
 import { createItem, updateItem } from '../../.husky/api/packData';
 
 const initialState = {
-  itemName: '',
-  itemQuantity: '',
-  itemDescription: '',
+  title: '',
+  quantity: '',
+  description: '',
 };
 // eslint-disable-next-line react/prop-types
-function PackingListForm({ packObj }) {
+function PackingListForm({ itemObj }) {
   const [formInput, setFormInput] = useState(initialState);
   const router = useRouter();
-  const { tripFirebaseKey } = router.query;
-  const { user } = useAuth();
+  const { tripId } = router.query;
 
   useEffect(() => {
-    if (packObj.packFirebaseKey) setFormInput(packObj);
-  }, [packObj]);
+    if (itemObj?.id) setFormInput(itemObj);
+  }, [itemObj]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,44 +32,47 @@ function PackingListForm({ packObj }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (packObj.packFirebaseKey) {
+    if (itemObj.id) {
       updateItem(formInput)
-        .then(() => router.push(`/Trip/${tripFirebaseKey}`));
+        .then(() => router.push(`/Trip/${tripId}`));
     } else {
       const payload = {
-        ...formInput, uid: user.uid, userName: user.displayName, tripFirebaseKey,
+        ...formInput, trip_id: tripId,
       };
       createItem(payload).then(() => {
-        router.push(`/Trip/${tripFirebaseKey}`);
+        router.push(`/Trip/${tripId}`);
       });
     }
   };
 
   return (
     <Form onSubmit={handleSubmit}>
-      <h2 className="text-white mt-5">{packObj.packFirebaseKey ? 'Update' : 'Create'} Item</h2>
+      <h2 className="text-white mt-5">{itemObj?.id ? 'Update' : 'Create'} Item</h2>
+      <FloatingLabel controlId="floatingInput2" label="Item Title" className="mb-3">
+        <Form.Control type="text" placeholder="Enter Item Title" name="title" value={formInput.title} onChange={handleChange} required />
+      </FloatingLabel>
       <FloatingLabel controlId="floatingInput2" label="Item Description" className="mb-3">
-        <Form.Control type="text" placeholder="Enter item Description" name="itemDescription" value={formInput.itemDescription} onChange={handleChange} required />
+        <Form.Control type="text" placeholder="Enter item Description" name="description" value={formInput.description} onChange={handleChange} required />
       </FloatingLabel>
       <FloatingLabel controlId="floatingInput2" label="Item Quantity" className="mb-3">
-        <Form.Control type="number" placeholder="Enter Item Quantity" name="itemQuantity" value={formInput.itemQuantity} onChange={handleChange} required />
+        <Form.Control type="number" placeholder="Enter Item Quantity" name="quantity" value={formInput.quantity} onChange={handleChange} required />
       </FloatingLabel>
-      <Button type="submit">{packObj.packFirebaseKey ? 'Update' : 'Create'} Item</Button>
+      <Button type="submit">{itemObj?.id ? 'Update' : 'Create'} Item</Button>
     </Form>
   );
 }
 
 PackingListForm.propTypes = {
-  packObj: PropTypes.shape({
-    itemDescription: PropTypes.string,
-    packFirebaseKey: PropTypes.string,
-    tripFirebaseKey: PropTypes.string,
-    uid: PropTypes.string,
+  itemObj: PropTypes.shape({
+    description: PropTypes.string,
+    id: PropTypes.string,
+    quantity: PropTypes.number,
+    title: PropTypes.string,
   }),
 };
 
 PackingListForm.defaultProps = {
-  packObj: initialState,
+  itemObj: initialState,
 };
 
 export default PackingListForm;

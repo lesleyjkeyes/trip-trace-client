@@ -5,7 +5,6 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
-import { useAuth } from '../../utils/context/authContext';
 import getAllCountries from '../../.husky/api/countryData';
 import { createStop, updateStop } from '../../.husky/api/stopData';
 
@@ -20,15 +19,14 @@ function StopForm({ stopObj }) {
   const [formInput, setFormInput] = useState(initialState);
   const [countries, setCountries] = useState([]);
   const router = useRouter();
-  const { tripFirebaseKey } = router.query;
-  const { user } = useAuth();
+  const { tripId } = router.query;
 
   useEffect(() => {
     getAllCountries().then(setCountries);
   }, []);
 
   useEffect(() => {
-    if (stopObj.stopFirebaseKey) setFormInput(stopObj);
+    if (stopObj.id) setFormInput(stopObj);
   }, [stopObj]);
 
   const handleChange = (e) => {
@@ -39,17 +37,20 @@ function StopForm({ stopObj }) {
     }));
   };
 
+  console.warn(router.query);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (stopObj.stopFirebaseKey) {
-      updateStop(formInput)
-        .then(() => router.push(`/Trip/${tripFirebaseKey}`));
+    if (stopObj.id) {
+      console.warn(router.query);
+      updateStop(formInput, tripId)
+        .then(() => router.push(`/Trip/${tripId}`));
     } else {
       const payload = {
-        ...formInput, uid: user.uid, userName: user.displayName, tripFirebaseKey,
+        ...formInput, trip_id: tripId,
       };
       createStop(payload).then(() => {
-        router.push(`/Trip/${tripFirebaseKey}`);
+        router.push(`/Trip/${tripId}`);
       });
     }
   };
@@ -57,17 +58,20 @@ function StopForm({ stopObj }) {
   return (
     // name(set this to the name of the object), value and onChange. type will also be required. placeholder and required are optional
     <Form onSubmit={handleSubmit}>
-      <h2 className="text-white mt-5">{stopObj.stopFirebaseKey ? 'Update' : 'Create'} Stop</h2>
+      <h2 className="text-white mt-5">{stopObj.id ? 'Update' : 'Create'} Stop</h2>
       <FloatingLabel controlId="floatingInput1" label="Stop Title" className="mb-3">
-        <Form.Control type="text" placeholder="Enter Stop Title" name="stopTitle" value={formInput.stopTitle} onChange={handleChange} required />
+        <Form.Control type="text" placeholder="Enter Stop Title" name="title" value={formInput.title} onChange={handleChange} required />
       </FloatingLabel>
-      <FloatingLabel controlId="floatingInput2" label="Stop Description" className="mb-3">
-        <Form.Control type="text" placeholder="Enter Stop Description" name="stopDescription" value={formInput.stopDescription} onChange={handleChange} required />
+      <FloatingLabel controlId="floatingInput2" label="Stop Duration" className="mb-3">
+        <Form.Control type="number" placeholder="Enter Stop Duration" name="duration" value={formInput.duration} onChange={handleChange} />
+      </FloatingLabel>
+      <FloatingLabel controlId="floatingInput2" label="Stop Duration Unit" className="mb-3">
+        <Form.Control type="text" placeholder="Enter Stop Duration Unit" name="duration_unit" value={formInput.duration_unit} onChange={handleChange} />
       </FloatingLabel>
       <FloatingLabel controlId="floatingSelect" label="Country">
         <Form.Select
           aria-label="Country"
-          name="country"
+          name="country_id"
           onChange={handleChange}
           className="mb-3"
           required
@@ -76,9 +80,9 @@ function StopForm({ stopObj }) {
           {
             countries.map((country) => (
               <option
-                key={country.firebaseKey}
-                value={country.firebaseKey}
-                selected={!stopObj ? '' : stopObj.country === country.name}
+                key={country.id}
+                value={country.id}
+                selected={!stopObj ? '' : stopObj.country?.id === country.id}
               >
                 {country.name}
               </option>
@@ -87,12 +91,12 @@ function StopForm({ stopObj }) {
         </Form.Select>
       </FloatingLabel>
       <FloatingLabel controlId="floatingInput2" label="Stop City" className="mb-3">
-        <Form.Control type="text" placeholder="Add Stop City(Optional)" name="stopCity" value={formInput.stopCity} onChange={handleChange} />
+        <Form.Control type="text" placeholder="Add Stop City(Optional)" name="city" value={formInput.city} onChange={handleChange} />
       </FloatingLabel>
-      <FloatingLabel controlId="floatingInput2" label="Stop Duration(Days)" className="mb-3">
-        <Form.Control type="number" placeholder="Enter Stop Duration(Days)" name="stopDuration" value={formInput.stopDuration} onChange={handleChange} required />
+      <FloatingLabel controlId="floatingInput2" label="Price Range" className="mb-3">
+        <Form.Control type="text" placeholder="Add Price Range" name="price_range" value={formInput.price_range} onChange={handleChange} required />
       </FloatingLabel>
-      <Button type="submit">{stopObj.stopFirebaseKey ? 'Update' : 'Create'} Stop</Button>
+      <Button type="submit">{stopObj.id ? 'Update' : 'Create'} Stop</Button>
     </Form>
   );
 }
@@ -105,7 +109,9 @@ StopForm.propTypes = {
     stopFirebaseKey: PropTypes.string,
     tripFirebaseKey: PropTypes.string,
     city: PropTypes.string,
-    country: PropTypes.string,
+    country: PropTypes.shape({
+      id: PropTypes.number,
+    }),
     id: PropTypes.string,
   }),
 };

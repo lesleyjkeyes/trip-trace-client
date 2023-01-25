@@ -73,7 +73,7 @@ export default function TripCard({ tripObj, onUpdate }) {
           Description: {tripObj?.description}
         </Card.Text>
         <Card.Text>
-          Country: {tripObj?.country}
+          Country: {tripObj?.country.name}
         </Card.Text>
         {tripObj?.city && (
           <Card.Text>
