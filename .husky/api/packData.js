@@ -15,36 +15,40 @@ const getAllItems = () => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-const getTripItems = (tripFirebaseKey) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/items.json?orderBy="tripFirebaseKey"&equalTo="${tripFirebaseKey}"`)
+const getTripItems = (tripId) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/items?trip_id=${tripId}`)
     .then((response) => resolve(Object.values(response.data)))
     .catch(reject);
 });
 
-const getSingleItem = (firebaseKey) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/items/${firebaseKey}.json`)
+const getSingleItem = (id) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/items/${id}`)
     .then((response) => resolve(response.data))
     .catch((error) => reject(error));
 });
 
-const updateItem = (packObj) => new Promise((resolve, reject) => {
-  axios.patch(`${dbUrl}/items/${itemObj.itemFirebaseKey}.json`, packObj)
-    .then(() => getAllStops(packObj.uid).then(resolve))
+const updateItem = (itemObj) => new Promise((resolve, reject) => {
+  axios.patch(`${dbUrl}/items/${itemObj.id}`, itemObj)
+    .then(() => getAllStops().then(resolve))
     .catch(reject);
 });
 
-const createItem = (packObj) => new Promise((resolve, reject) => {
-  axios.post(`${dbUrl}/items.json`, packObj)
-    .then((response) => {
-      const payload = { packFirebaseKey: response.data.name };
-      axios.patch(`${dbUrl}/items/${response.data.name}.json`, payload)
-        .then((patchResponse) => resolve(patchResponse.data));
-    }).catch(reject);
+const createItem = (itemObj) => new Promise((resolve, reject) => {
+  console.warn(itemObj)
+  fetch(`${clientCredentials.databaseURL}/items`, {
+    method: 'POST',
+    body: JSON.stringify(itemObj),
+    headers: {
+      'content-type': 'application/json',
+    },
+  })
+    .then((response) => resolve(response.json()))
+    .catch((error) => reject(error));
 });
 
-const deleteSingleItem = (itemFirebaseKey, tripFirebaseKey) => new Promise((resolve, reject) => {
-  axios.delete(`${dbUrl}/items/${itemFirebaseKey}.json`)
-  .then(() => getTripItems(tripFirebaseKey).then(resolve))
+const deleteSingleItem = (itemId, tripId) => new Promise((resolve, reject) => {
+  axios.delete(`${dbUrl}/items/${itemId}`)
+  .then(() => getTripItems(tripId).then(resolve))
   .catch(reject);
 });
 

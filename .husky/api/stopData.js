@@ -4,7 +4,7 @@ import { clientCredentials } from '../../utils/client';
 const dbUrl = clientCredentials.databaseURL;
 
 const getAllStops = () => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/stops.json`)
+  axios.get(`${dbUrl}/stops`)
     .then((response) => {
       if (response.data) {
         resolve(Object.values(response.data));
@@ -15,37 +15,40 @@ const getAllStops = () => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-const getTripStops = (tripFirebaseKey) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/stops.json?orderBy="tripFirebaseKey"&equalTo="${tripFirebaseKey}"`)
+const getTripStops = (tripId) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/stops?trip_id=${tripId}`)
     .then((response) => resolve(Object.values(response.data)))
     .catch(reject);
 });
 
-const getSingleStop = (firebaseKey) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/stops/${firebaseKey}.json`)
+const getSingleStop = (stopId) => new Promise((resolve, reject) => {
+  axios.get(`${dbUrl}/stops/${stopId}`)
     .then((response) => resolve(response.data))
     .catch((error) => reject(error));
 });
 
-const updateStop = (stopObj) => new Promise((resolve, reject) => {
-  axios.patch(`${dbUrl}/stops/${stopObj.stopFirebaseKey}.json`, stopObj)
-    .then(() => getAllStops(stopObj.uid).then(resolve))
+const updateStop = (stopObj, tripId) => new Promise((resolve, reject) => {
+  axios.put(`${dbUrl}/stops/${stopObj.id}`, stopObj)
+    .then(() => getTripStops(tripId).then(resolve))
     .catch(reject);
 });
 
 const createStop = (stopObj) => new Promise((resolve, reject) => {
-  axios.post(`${dbUrl}/stops.json`, stopObj)
-    .then((response) => {
-      const payload = { stopFirebaseKey: response.data.name };
-      axios.patch(`${dbUrl}/stops/${response.data.name}.json`, payload)
-        .then((patchResponse) => resolve(patchResponse.data));
-    }).catch(reject);
+  fetch(`${clientCredentials.databaseURL}/stops`, {
+    method: 'POST',
+    body: JSON.stringify(stopObj),
+    headers: {
+      'content-type': 'application/json',
+    },
+  })
+    .then((response) => resolve(response.json()))
+    .catch((error) => reject(error));
 });
 
-const deleteSingleStop = (firebaseKey) => new Promise((resolve, reject) => {
-  axios.delete(`${dbUrl}/stops/${firebaseKey}.json`)
+const deleteSingleStop = (stopId, tripId) => new Promise((resolve, reject) => {
+  axios.delete(`${dbUrl}/stops/${stopId}`)
     .then(() => {
-      getAllStops().then((tripsArray) => resolve(tripsArray));
+      getTripStops(tripId).then((stopsArray) => resolve(stopsArray));
     })
     .catch((error) => reject(error));
 });

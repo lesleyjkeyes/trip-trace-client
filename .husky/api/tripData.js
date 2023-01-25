@@ -26,7 +26,7 @@ const getSingleTrip = (tripId) => new Promise((resolve, reject) => {
         createdOn: data.created_on,
         duration: data.duration,
         durationUnit: data.duration_unit,
-        userId: data.traveler_id,
+        travelerId: data.traveler_id,
         region: data.region,
         countryId: data.country_id,
         city: data.city,
