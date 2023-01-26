@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
@@ -30,7 +31,7 @@ function PackingTable({ tripId }) {
           <th>Item Title</th>
           <th>Item Description</th>
           <th>Item Quantity</th>
-          {items[0]?.trip.traveler === user.id ? <th>Options</th> : ''}
+          {items[0]?.trip.traveler === user.id ? <th colSpan="2">Options</th> : ''}
         </tr>
       </thead>
       <tbody>
@@ -41,6 +42,7 @@ function PackingTable({ tripId }) {
               <td>{item.description}</td>
               <td>{item.quantity}</td>
               {item.trip.traveler === user.id ? <td><Button onClick={() => { deleteAnItem(item.id); }}>Delete</Button></td> : ''}
+              {item.trip.traveler === user.id ? <td><Link passHref href={`Trip/item/edit/${item.id}`}><Button>Edit</Button></Link></td> : ''}
             </tr>
           ))
         }
