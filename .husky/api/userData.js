@@ -12,15 +12,24 @@ const addUser = (user) => new Promise((resolve, reject) => {
     }).catch(reject);
 });
 
-const getUser = (uid) => new Promise((resolve, reject) => {
-  axios.get(`${dbUrl}/users.json?orderBy="uid"&equalTo="${uid}"`)
-    .then((response) => resolve(Object.values(response.data)[0]))
-    .catch((reject));
+const getUser = (userId) => new Promise((resolve, reject) => {
+  fetch(`${dbUrl}/users/${userId}`).then((response) => response.json())
+    .then((data) => {
+      resolve({
+        id: data.id,
+        about: data.about,
+        email: data.email,
+        imageUrl: data.image_url,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        uid: data.uid
+      });
+    }).catch((error) => reject(error));
 });
 
 const updateUser = (uid, userUpdate) => new Promise((resolve, reject) => {
   getUser(uid).then((userObj) => {
-    axios.patch(`${dbUrl}/users/${userObj.userFirebaseKey}.json`, userUpdate)
+    axios.patch(`${dbUrl}/users/${userObj.id}.json`, userUpdate)
       .then(resolve);
   }).catch(reject);
 });

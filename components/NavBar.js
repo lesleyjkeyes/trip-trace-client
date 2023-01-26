@@ -33,7 +33,7 @@ export default function NavBar() {
             <Link passHref href="/favoriteTrips/">
               <Nav.Link>Favorites</Nav.Link>
             </Link>
-            <Link passHref href="/profile">
+            <Link passHref href={`/userProfile/${user?.id}`}>
               <Nav.Link>Profile</Nav.Link>
             </Link>
             {

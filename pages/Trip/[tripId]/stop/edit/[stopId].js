@@ -7,11 +7,11 @@ export default function EditStop() {
   const [editItem, setEditItem] = useState({});
   const router = useRouter();
 
-  const { stopFirebaseKey } = router.query;
+  const { stopId } = router.query;
 
   useEffect(() => {
-    getSingleStop(stopFirebaseKey).then(setEditItem);
-  }, [stopFirebaseKey]);
+    getSingleStop(stopId).then(setEditItem);
+  }, [stopId]);
 
   return (<StopForm stopObj={editItem} />);
 }

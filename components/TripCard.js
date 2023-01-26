@@ -60,13 +60,13 @@ export default function TripCard({ tripObj, onUpdate }) {
       <Card.Body>
         <Card.Link href={`/Trip/${tripObj?.id}`}>{tripObj?.title}</Card.Link>
         <div className="vidCardImageDiv">
-          <NavLink href={`/userProfile/${tripObj?.traveler_id}`} passHref>
-            <Image style={{ height: '50px' }} className="tripCardCreatorImage" src={tripObj?.userPhoto} />
+          <NavLink href={`/userProfile/${tripObj.traveler?.id}`} passHref>
+            <Image style={{ height: '50px' }} className="tripCardCreatorImage" src={tripObj.traveler?.image_url} />
           </NavLink>
         </div>
         <div className="userName">
-          <Card.Link href={`/userProfile/${tripObj?.traveler_id}`}>
-            {tripObj?.userName}
+          <Card.Link href={`/userProfile/${tripObj.traveler?.id}`}>
+            {tripObj.traveler?.first_name} {tripObj.traveler?.last_name}
           </Card.Link>
         </div>
         <Card.Text>
@@ -114,10 +114,14 @@ TripCard.propTypes = {
     tripFirebaseKey: PropTypes.string,
     country: PropTypes.string,
     city: PropTypes.string,
-    userPhoto: PropTypes.string,
-    userName: PropTypes.string,
     traveler_id: PropTypes.number,
     id: PropTypes.number,
+    traveler: PropTypes.shape({
+      id: PropTypes.string,
+      image_url: PropTypes.string,
+      first_name: PropTypes.string,
+      last_name: PropTypes.string,
+    }),
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
 };

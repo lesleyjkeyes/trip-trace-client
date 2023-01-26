@@ -28,8 +28,13 @@ const getSingleItem = (id) => new Promise((resolve, reject) => {
 });
 
 const updateItem = (itemObj) => new Promise((resolve, reject) => {
-  axios.patch(`${dbUrl}/items/${itemObj.id}`, itemObj)
-    .then(() => getAllStops().then(resolve))
+  const newItemObj = {
+    title: itemObj.title,
+    description: itemObj.description,
+    quantity: tripObj.quantity
+  };
+  axios.put(`${dbUrl}/items/${itemObj.id}`, newItemObj)
+    .then(() => getTripItems(itemobj.id).then(resolve))
     .catch(reject);
 });
 
