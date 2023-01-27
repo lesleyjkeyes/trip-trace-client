@@ -7,6 +7,9 @@ import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 import getAllCountries from '../../.husky/api/countryData';
 import { createStop, updateStop } from '../../.husky/api/stopData';
+import {
+  getAllCatgories, getCategoriesByStop, createStopCategory, deleteStopCategory,
+} from '../../.husky/api/categoryData';
 
 const initialState = {
   stopTitle: '',
@@ -18,15 +21,21 @@ const initialState = {
 function StopForm({ stopObj }) {
   const [formInput, setFormInput] = useState(initialState);
   const [countries, setCountries] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const router = useRouter();
   const { tripId } = router.query;
 
   useEffect(() => {
     getAllCountries().then(setCountries);
+    getAllCatgories().then(setCategories);
   }, []);
 
   useEffect(() => {
-    if (stopObj.id) setFormInput(stopObj);
+    if (stopObj.id) {
+      setFormInput(stopObj);
+      getCategoriesByStop(stopObj.id).then((categoryArray) => setSelectedCategories(categoryArray.map((category) => category.category_id)));
+    }
   }, [stopObj]);
 
   const handleChange = (e) => {
@@ -37,19 +46,48 @@ function StopForm({ stopObj }) {
     }));
   };
 
-  console.warn(router.query);
+  const handleCategoryChange = (categoryId) => {
+    if (selectedCategories.includes(categoryId)) {
+      setSelectedCategories(selectedCategories.filter((category) => category !== categoryId));
+    } else {
+      setSelectedCategories([...selectedCategories, categoryId]);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (stopObj.id) {
-      console.warn(router.query);
+      getCategoriesByStop(stopObj.id).then((existingStopCategories) => {
+        existingStopCategories.forEach((existingStopCategory) => {
+          if (!selectedCategories.includes(existingStopCategory.category_id)) {
+            deleteStopCategory(existingStopCategory.id);
+          }
+        });
+        selectedCategories.forEach((categoryId) => {
+          const existingStopCategory = existingStopCategories.find((stopCategory) => stopCategory.category_id === categoryId);
+          if (!existingStopCategory) {
+            const stopCategoryObj = {
+              stop_id: stopObj.id,
+              category_id: categoryId,
+            };
+            createStopCategory(stopCategoryObj);
+          }
+        });
+      });
       updateStop(formInput, tripId)
         .then(() => router.push(`/Trip/${tripId}`));
     } else {
       const payload = {
         ...formInput, trip_id: tripId,
       };
-      createStop(payload).then(() => {
+      createStop(payload).then((response) => {
+        selectedCategories.forEach((categoryId) => {
+          const stopCategoryObj = {
+            stop_id: response.id,
+            category_id: categoryId,
+          };
+          createStopCategory(stopCategoryObj);
+        });
         router.push(`/Trip/${tripId}`);
       });
     }
@@ -96,6 +134,20 @@ function StopForm({ stopObj }) {
       <FloatingLabel controlId="floatingInput2" label="Price Range" className="mb-3">
         <Form.Control type="text" placeholder="Add Price Range" name="price_range" value={formInput.price_range} onChange={handleChange} required />
       </FloatingLabel>
+      {
+          categories.map((category) => (
+            <Form.Check
+              inline
+              label={category.title}
+              name="check"
+              type="checkbox"
+              value={category.id}
+              key={category.id}
+              checked={selectedCategories.includes(category.id)}
+              onChange={() => handleCategoryChange(category.id)}
+            />
+          ))
+        }
       <Button type="submit">{stopObj.id ? 'Update' : 'Create'} Stop</Button>
     </Form>
   );
