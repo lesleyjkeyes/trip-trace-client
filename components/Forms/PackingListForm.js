@@ -34,7 +34,7 @@ function PackingListForm({ itemObj }) {
     e.preventDefault();
     if (itemObj.id) {
       updateItem(formInput)
-        .then(() => router.push(`/Trip/${tripId}`));
+        .then(() => router.push(`/Trip/${itemObj.trip.id}`));
     } else {
       const payload = {
         ...formInput, trip_id: tripId,
@@ -68,6 +68,9 @@ PackingListForm.propTypes = {
     id: PropTypes.string,
     quantity: PropTypes.number,
     title: PropTypes.string,
+    trip: PropTypes.shape({
+      id: PropTypes.number,
+    }),
   }),
 };
 

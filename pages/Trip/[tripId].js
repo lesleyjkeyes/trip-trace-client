@@ -38,10 +38,10 @@ function SingleTripView() {
       <Card style={{ width: '36rem' }}>
         <Card.Body>
           <Card.Title>{trip?.title}</Card.Title>
-          <Image className="userPhoto" src={trip?.imageUrl} />
-          <Card.Subtitle className="mb-2 text-muted">Created by: {trip.traveler?.firstName}</Card.Subtitle>
+          <Image className="userPhoto" class="img-fluid" src={trip?.imageUrl} />
+          <Card.Subtitle className="mb-2 text-muted">Created by: {trip.travelerFirstName} {trip.travelerLastName}</Card.Subtitle>
           <Card.Text>
-            Country: {trip.country?.name}
+            Country: {trip.countryName}
           </Card.Text>
           {trip?.city && (
           <Card.Text>

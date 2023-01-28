@@ -16,6 +16,7 @@ const getAllItems = () => new Promise((resolve, reject) => {
 });
 
 const getTripItems = (tripId) => new Promise((resolve, reject) => {
+  console.warn(tripId)
   axios.get(`${dbUrl}/items?trip_id=${tripId}`)
     .then((response) => resolve(Object.values(response.data)))
     .catch(reject);
@@ -31,10 +32,10 @@ const updateItem = (itemObj) => new Promise((resolve, reject) => {
   const newItemObj = {
     title: itemObj.title,
     description: itemObj.description,
-    quantity: tripObj.quantity
+    quantity: itemObj.quantity
   };
   axios.put(`${dbUrl}/items/${itemObj.id}`, newItemObj)
-    .then(() => getTripItems(itemobj.id).then(resolve))
+    .then(() => getTripItems(itemObj.trip.id).then(resolve))
     .catch(reject);
 });
 

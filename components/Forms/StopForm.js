@@ -34,7 +34,7 @@ function StopForm({ stopObj }) {
   useEffect(() => {
     if (stopObj.id) {
       setFormInput(stopObj);
-      getCategoriesByStop(stopObj.id).then((categoryArray) => setSelectedCategories(categoryArray.map((category) => category.category_id)));
+      getCategoriesByStop(stopObj.id).then((categoryArray) => setSelectedCategories(categoryArray.map((category) => category.category.id)));
     }
   }, [stopObj]);
 
