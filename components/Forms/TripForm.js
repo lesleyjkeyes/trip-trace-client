@@ -139,7 +139,7 @@ TripForm.propTypes = {
     imageUrl: PropTypes.string,
     tripFirebaseKey: PropTypes.string,
     city: PropTypes.string,
-    countryId: PropTypes.number,
+    countryId: PropTypes.string,
     id: PropTypes.string,
     public: PropTypes.bool,
   }),

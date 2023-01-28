@@ -73,7 +73,7 @@ export default function TripCard({ tripObj, onUpdate }) {
           Description: {tripObj?.description}
         </Card.Text>
         <Card.Text>
-          Country: {tripObj?.country.name}
+          Country: {tripObj.country?.name}
         </Card.Text>
         {tripObj?.city && (
           <Card.Text>
@@ -91,7 +91,7 @@ export default function TripCard({ tripObj, onUpdate }) {
                 onChange={(e) => handleFavorite(e.target.checked)}
               />
             </Form>
-            { user.id === tripObj.traveler_id && (
+            { user.id === tripObj.traveler?.id && (
               <>
                 <Link href={`/Trip/edit/${tripObj?.id}`} passHref>
                   <Button variant="info" style={{ margin: '5px' }}>EDIT</Button>

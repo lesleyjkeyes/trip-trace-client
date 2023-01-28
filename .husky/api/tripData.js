@@ -27,8 +27,11 @@ const getSingleTrip = (tripId) => new Promise((resolve, reject) => {
         duration: data.duration,
         durationUnit: data.duration_unit,
         travelerId: data.traveler.id,
+        travelerFirstName: data.traveler.first_name,
+        travelerLastName: data.traveler.last_name,
         region: data.region,
-        countryId: data.country_id,
+        countryId: data.country.id,
+        countryName: data.country.name,
         city: data.city,
         public: data.public,
         priceRange: data.price_range

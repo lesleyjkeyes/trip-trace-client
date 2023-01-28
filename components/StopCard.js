@@ -1,14 +1,16 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, Button } from 'react-bootstrap';
 import { deleteSingleStop } from '../.husky/api/stopData';
 import { useAuth } from '../utils/context/authContext';
+import { getCategoriesByStop } from '../.husky/api/categoryData';
 
 export default function StopCard({
   // eslint-disable-next-line react/prop-types
   stopObj, onUpdate, index,
 }) {
+  const [categories, setCategories] = useState([]);
   const { user } = useAuth();
 
   const deleteThisStop = () => {
@@ -16,6 +18,10 @@ export default function StopCard({
       deleteSingleStop(stopObj.id, stopObj.trip.id).then(() => onUpdate());
     }
   };
+
+  useEffect(() => {
+    getCategoriesByStop(stopObj.id).then(setCategories);
+  }, [stopObj]);
 
   return (
     <Card style={{ width: '18rem' }}>
@@ -27,6 +33,15 @@ export default function StopCard({
         <Card.Text>Duration: { stopObj.duration }</Card.Text>
         <Card.Text>Duration Unit: { stopObj.duration_unit }</Card.Text>
         <Card.Text>Price Range: { stopObj.price_range }</Card.Text>
+        {categories.length > 0 && (
+        <Card.Text>Category:
+          {categories.map((category) => (
+            <span key={category.category_id} className="badge text-bg-dark">
+              {category.category.title}
+            </span>
+          ))}
+        </Card.Text>
+        )}
         {user.id === stopObj.trip.traveler.id && (
           <>
             <Button variant="dark" onClick={deleteThisStop}>Delete</Button>
