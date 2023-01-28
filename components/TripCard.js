@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import { Image, NavLink } from 'react-bootstrap';
+import { Image } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../utils/context/authContext';
@@ -60,9 +60,9 @@ export default function TripCard({ tripObj, onUpdate }) {
       <Card.Body>
         <Card.Link href={`/Trip/${tripObj?.id}`}>{tripObj?.title}</Card.Link>
         <div className="vidCardImageDiv">
-          <NavLink href={`/userProfile/${tripObj.traveler?.id}`} passHref>
+          <Link href={`/userProfile/${tripObj.traveler?.id}`} passHref>
             <Image style={{ height: '50px' }} className="tripCardCreatorImage" src={tripObj.traveler?.image_url} />
-          </NavLink>
+          </Link>
         </div>
         <div className="userName">
           <Card.Link href={`/userProfile/${tripObj.traveler?.id}`}>
